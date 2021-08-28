@@ -1,31 +1,46 @@
 import React from "react";
-import PropTypes from "prop-types";
+import axios from "axios";
+import Movie from "./Movie"
+import "./App.css";
 // component is function that returns html
-function Food({fav, picture, rating}){ //property object를 열어 fav 를 get
-  return <div>
-    <h1>I like {fav}</h1>
-    <img src={picture} alt={fav}/>
-    <h1>rating : {rating} </h1>
-  </div>
+class App extends React.Component{  // React.Component로부터 extend된 class => App
+  state={
+    isLoading: true,
+    movies: []
+  }
+  async getMovies(){
+    const {data:{data: {movies}}}= await axios.get("https://yts-proxy.now.sh/list_movies.json?sort_by=rating");
+    this.setState({ movies , isLoading:false});
+  }
+  componentDidMount(){
+    this.getMovies();
+  }
+  render(){
+    const { isLoading, movies }=this.state;
+    return <section className="container">
+      {isLoading? (
+        <div className="loader">
+          <span className="loader__text">Loading...</span>
+        </div>
+      ):(
+        <div className="movies">
+          {movies.map(movie=>(
+            <Movie 
+              key={movie.id}
+              id={movie.id} 
+              year={movie.year} 
+              title={movie.title} 
+              summary={movie.summary} 
+              poster={movie.medium_cover_image}
+              genres={movie.genres}
+            />
+          ))} 
+        </div>
+      )}
+    </section>;
+  };
 }
 
-Food.propTypes={  // property 의 type check를 위한 description
-  fav: PropTypes.string.isRequired,
-  picture: PropTypes.string.isRequired, // isRequired 필수
-  rating: PropTypes.number
-}
-function renderFood(food){
-  return <Food key={food.id} fav={food.name} picture={food.image} rating={food.rating} />;
-}
 
-
-
-function App() {
-  return (
-    <div className="App">
-    {foodILike.map(renderFood)}
-    </div>
-  );
-}
 
 export default App;
